@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест по Архитектуре ИС</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --success: #10b981;
+            --error: #ef4444;
+            --bg: #f3f4f6;
+            --card-bg: #ffffff;
+            --text: #1f2937;
+            --text-secondary: #6b7280;
+            --border: #e5e7eb;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        h1, h2, h3 {
+            margin-top: 0;
+            color: var(--text);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--primary);
+        }
+
+        /* Views */
+        .view {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--border);
+            color: var(--text);
+            margin-top: 0.5rem;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Start Screen */
+        .topic-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 1.5rem 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .topic-item {
+            background: var(--bg);
+            padding: 10px;
+            border-radius: 6px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .topic-item.selected {
+            border-color: var(--primary);
+            background-color: #eff6ff;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .mode-select {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        /* Quiz Interface */
+        .progress-bar {
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .question-text {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-item:hover {
+            border-color: var(--primary);
+            background-color: #f9fafb;
+        }
+
+        .option-item.selected {
+            border-color: var(--primary);
+            background-color: #eff6ff;
+        }
+
+        .option-item input {
+            margin-top: 4px;
+            margin-right: 12px;
+        }
+
+        /* Sequence & Matching Styles */
+        .sortable-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sortable-item {
+            background: #fff;
+            border: 1px solid var(--border);
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        
+        .sortable-item:active {
+            cursor: grabbing;
+            background: #f9fafb;
+        }
+
+        .matching-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        
+        .matching-key {
+            flex: 1;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .matching-select {
+            flex: 2;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            max-width: 100%;
+        }
+
+        /* Feedback */
+        .feedback {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .feedback.success {
+            background-color: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+            display: block;
+        }
+
+        .feedback.error {
+            background-color: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+            display: block;
+        }
+
+        /* Results */
+        .result-score {
+            font-size: 3rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 1rem 0;
+            color: var(--primary);
+        }
+        
+        .result-message {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .topic-stats {
+            margin-top: 2rem;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stat-good { color: var(--success); }
+        .stat-avg { color: #d97706; }
+        .stat-bad { color: var(--error); }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>АИС Тестирование</h1>
+
+    <div id="start-screen" class="view active">
+        <h3>Выберите разделы для тестирования:</h3>
+        <ul class="topic-list" id="topic-list">
+            </ul>
+        <button class="btn btn-outline" id="select-all-topics">Выбрать все</button>
+
+        <div class="input-group" style="margin-top: 1.5rem;">
+            <label>Количество вопросов (0 = все доступные):</label>
+            <input type="number" id="question-count" min="0" value="0">
+        </div>
+
+        <button class="btn btn-primary" id="start-btn">Начать тест</button>
+    </div>
+
+    <div id="quiz-screen" class="view">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        
+        <div class="question-meta">
+            <span id="question-topic">Тема</span>
+            <span id="question-counter">1 / 10</span>
+        </div>
+
+        <div class="question-text" id="question-text">Текст вопроса</div>
+
+        <div id="options-container">
+            </div>
+
+        <div id="feedback-area" class="feedback"></div>
+
+        <button class="btn btn-primary" id="submit-btn">Ответить</button>
+        <button class="btn btn-primary" id="next-btn" style="display: none;">Следующий вопрос</button>
+    </div>
+
+    <div id="result-screen" class="view">
+        <h2 style="text-align: center;">Результаты</h2>
+        <div class="result-score" id="final-score">0%</div>
+        <div class="result-message" id="final-message"></div>
+
+        <h3>Детализация по темам:</h3>
+        <div id="topic-stats-container"></div>
+
+        <button class="btn btn-primary" onclick="location.reload()">Пройти заново</button>
+    </div>
+</div>
+
+<script>
+    // --- DATA (Extracted from Program.cs) ---
+    const QuestionType = {
+        SingleChoice: 0,
+        MultipleChoice: 1,
+        Sequence: 2,
+        Matching: 3
+    };
+
+    // Full database of questions from the C# source
+    const rawQuestions = [
+        // Архитектурные стили
+        { id: 1, topic: "Архитектурные стили", type: QuestionType.SingleChoice, text: "Системы, на вход которых поступает сырье, а на выходе образуется готовый продукт, называются:", options: ["Системы управления доступом", "Системы мониторинга ресурсов", "Системы управления производством", "Управляющие системы"], correct: "3" },
+        { id: 2, topic: "Архитектурные стили", type: QuestionType.SingleChoice, text: "К какому архитектурному стилю относится экспертная система «Expro»?", options: ["Потоки данных", "Виртуальная машина", "Независимые компоненты", "Централизованные данные"], correct: "2" },
+        { id: 4, topic: "Архитектурные стили", type: QuestionType.MultipleChoice, text: "К архитектурному стилю «Виртуальные машины» относятся следующие архитектурные подстили:", options: ["Клиент-серверные системы", "Интерпретаторы", "Системы взаимодействующих процессов", "Системы, основанные на правилах"], correct: "2,4" },
+        { id: 8, topic: "Архитектурные стили", type: QuestionType.SingleChoice, text: "В каком архитектурном стиле используется механизм «Публикация-подписка»?", options: ["Вызов с возвратом", "Потоки данных", "Централизованные репозитарии", "Независимые компоненты"], correct: "4" },
+        { id: 20, topic: "Архитектурные стили", type: QuestionType.SingleChoice, text: "К какому архитектурному стилю относится система «Blackboard»?", options: ["Потоки данных", "Виртуальная машина", "Централизованные данные", "Независимые компоненты"], correct: "3" },
+        { id: 28, topic: "Архитектурные стили", type: QuestionType.MultipleChoice, text: "К архитектурному стилю «Вызов с возвратом» относятся следующие архитектурные подстили:", options: ["Клиент-серверные системы", "Системы, управляемые событиями", "Объектно-ориентированные системы", "Иерархические многоуровневые системы"], correct: "1,3,4" },
+        { id: 39, topic: "Архитектурные стили", type: QuestionType.MultipleChoice, text: "К архитектурному стилю «Независимые компоненты» относятся следующие архитектурные подстили:", options: ["Системы, управляемые событиями", "Системы взаимодействующих процессов", "Объектно-ориентированные системы", "Клиент-серверные системы"], correct: "1,2" },
+        { id: 52, topic: "Архитектурные стили", type: QuestionType.MultipleChoice, text: "К архитектурному стилю «потоки данных» относятся следующие архитектурные подстили:", options: ["Системы пакетно-последовательной обработки", "Системы, основанные на правилах", "Системы типа конвейеры и фильтры", "Системы взаимодействующих процессов"], correct: "1,3" },
+        { id: 53, topic: "Архитектурные стили", type: QuestionType.MultipleChoice, text: "К архитектурному стилю «Централизованные репозитарии данных» относятся следующие архитектурные подстили:", options: ["Системы, основанные на использовании централизованной базы данных", "Системы, управляемые событиями", "Системы, использующие принцип классной доски", "Интерпретаторы"], correct: "1,3" },
+        { id: 57, topic: "Архитектурные стили", type: QuestionType.SingleChoice, text: "Какой архитектурный стиль лучше всего применять при построении систем цифровой обработки изображений?", options: ["Виртуальная машина", "Потоки данных", "Независимые компоненты", "Вызов с возвратом"], correct: "2" },
+        
+        // Фреймворки
+        { id: 3, topic: "Фреймворки", type: QuestionType.SingleChoice, text: "Набор типовых решений, методик проектирования и классов, которые могут быть использованы при решении множества задач, называется:", options: ["Антипаттерн", "Архитектурный стиль", "Фреймворк", "Компонентная среда"], correct: "3" },
+        { id: 5, topic: "Фреймворки", type: QuestionType.SingleChoice, text: "Недостатками какого фреймворка являются невозможность описать динамику системы и отсутствие распространения изменений между элементами:", options: ["TOGAF", "Фреймворк Захмана", "DoDAF", "RUP"], correct: "2" },
+        { id: 6, topic: "Фреймворки", type: QuestionType.SingleChoice, text: "Какой из фреймворков описывается в виде круговой последовательности фаз проектирования системы?", options: ["Фреймворк Захмана", "Фреймворк TOGAF", "Фреймворк DoDAF", "ITIL"], correct: "2" },
+        { id: 9, topic: "Фреймворки", type: QuestionType.Sequence, text: "Расположите фазы фреймворка TOGAF в правильном порядке:", options: ["Разработка общего представления", "Разработка бизнес-архитектуры", "Разработка информационной архитектуры", "Разработка технологической архитектуры"], correct: "1234" },
+        { id: 21, topic: "Фреймворки", type: QuestionType.SingleChoice, text: "Какой из перечисленных фреймворков имеет матричное представление?", options: ["TOGAF", "Фреймворк Захмана", "DoDAF", "ITIL"], correct: "2" },
+        { id: 26, topic: "Фреймворки", type: QuestionType.SingleChoice, text: "В каком государственном стандарте закреплен стандарт разработки информационной системы?", options: ["ГОСТ 34.xxx", "ГОСТ 28195", "ГОСТ Р ИСО 9001", "ГОСТ 19.xxx"], correct: "2" },
+        { id: 47, topic: "Фреймворки", type: QuestionType.Sequence, text: "Расположите в правильном порядке слои архитектуры информационной системы:", options: ["Бизнес-архитектура", "ИТ-архитектура", "Архитектура данных", "Архитектура приложения", "Техническая архитектура"], correct: "12345" },
+        { id: 65, topic: "Фреймворки", type: QuestionType.Sequence, text: "Расположите шаги методики построения архитектурного описания согласно фреймворку DoDAF в правильном порядке:", options: ["определение назначения архитектурного стиля", "определение уровня детализации описания", "определение необходимых данных", "сбор и обработка данных", "анализ архитектуры на соответствие требованиям", "документирование архитектуры"], correct: "123456" },
+        { id: 74, topic: "Фреймворки", type: QuestionType.SingleChoice, text: "Какой из перечисленных фреймворков осуществляет построение точек зрения?", options: ["Фреймворк Захмана", "Фреймворк TOGAF", "Фреймворк DoDAF", "RUP"], correct: "3" },
+        { id: 75, topic: "Фреймворки", type: QuestionType.Matching, text: "Установите соответствие понятий фреймворка DoDAF:", matchingOptions: { "1": "Фреймворк", "2": "Модель", "3": "Вид", "4": "Точка зрения" }, matchingValues: { "А": "Набор типовых решений, методик проектирования и классов", "Б": "Шаблон сбора данных", "В": "Способ представления связного набора данных", "Г": "Описание данных с позиции их полезности для принятия решения" }, correct: "1-А,2-Б,3-В,4-Г" },
+
+        // Паттерны
+        { id: 7, topic: "Паттерны", type: QuestionType.SingleChoice, text: "Какой группе паттернов относятся паттерны «Однопоточное выполнение», «Охраняемая приостановка», «Объект блокировки»?", options: ["Структурные паттерны", "Поведенческие паттерны", "Производящие паттерны", "Паттерны параллельного программирования"], correct: "4" },
+        { id: 12, topic: "Паттерны", type: QuestionType.SingleChoice, text: "Какие паттерны рассматривают архитектуру информационной системы в целом?", options: ["Системные паттерны", "Концептуальные паттерны", "Структурные паттерны", "Архитектурные паттерны"], correct: "2" },
+        { id: 18, topic: "Паттерны", type: QuestionType.SingleChoice, text: "Набор абстрактных классов наиболее часто внедряемых плохих решений проблем, называется:", options: ["Фреймворк", "Паттерн", "Антипаттерн", "Шаблон"], correct: "3" },
+        { id: 27, topic: "Паттерны", type: QuestionType.SingleChoice, text: "К какой группе паттернов относятся паттерны «Итератор», «Моментальный снимок», «Состояние»?", options: ["Структурные паттерны", "Поведенческие паттерны", "Порождающие паттерны", "Системные паттерны"], correct: "2" },
+        { id: 36, topic: "Паттерны", type: QuestionType.SingleChoice, text: "К какой группе паттернов относятся паттерны «Мост», «Адаптер», «Прокси»?", options: ["Структурные паттерны", "Поведенческие паттерны", "Порождающие паттерны", "Концептуальные паттерны"], correct: "1" },
+        { id: 48, topic: "Паттерны", type: QuestionType.SingleChoice, text: "К какой группе относится паттерн «Фабрика»?", options: ["Структурные паттерны", "Поведенческие паттерны", "Производящие паттерны", "Системные паттерны"], correct: "3" },
+        { id: 54, topic: "Паттерны", type: QuestionType.SingleChoice, text: "К какой группе паттернов относятся паттерны «Транзакция», «Сессия», «Обратный вызов»?", options: ["Поведенческие паттерны", "Порождающие паттерны", "Концептуальные паттерны", "Системные паттерны"], correct: "4" },
+        { id: 59, topic: "Паттерны", type: QuestionType.SingleChoice, text: "Набор абстрактных классов, ориентированных на решение задач, относящихся к определенному домену, называется:", options: ["Фреймворк", "Антипаттерн", "Паттерн", "Методология"], correct: "3" },
+
+        // Компонентные технологии
+        { id: 10, topic: "Компонентные технологии", type: QuestionType.SingleChoice, text: "Структурная единица программной системы с четко определенным интерфейсом, который полностью описывает ее зависимости от контекста, называется:", options: ["Класс", "Объект", "Компонент", "Модуль"], correct: "3" },
+        { id: 17, topic: "Компонентные технологии", type: QuestionType.SingleChoice, text: "Как называется расширение объектной модели компонентов COM, которые позволяют создавать удаленные объекты и обеспечивать доступ к ним?", options: ["COM+", "DCOM", ".NET", "CORBA"], correct: "2" },
+        { id: 19, topic: "Компонентные технологии", type: QuestionType.SingleChoice, text: "Как называется основная библиотека классов, образующая .Net Framework?", options: ["CLR", "FCL", "BCL", "API"], correct: "2" },
+        { id: 25, topic: "Компонентные технологии", type: QuestionType.Matching, text: "Установите соответствие определений элементов сборки .Net Framework:", matchingOptions: { "1": "Код приложения", "2": "Метаданные", "3": "Манифест", "4": "Ресурсы" }, matchingValues: { "А": "Текст, который компилируется в формат промежуточного языка", "Б": "Информация о типах, объявленных в сборке", "В": "Сведения об имени сборки, версии, файлах", "Г": "Графические файлы, курсоры и статический текст" }, correct: "1-А,2-Б,3-В,4-Г" },
+        { id: 30, topic: "Компонентные технологии", type: QuestionType.SingleChoice, text: "Как называется способ повторного использования COM-объектов, при котором внешний объект представляет в качестве собственных интерфейсы, которые на самом деле реализуются внутренним объектом?", options: ["Наследование", "Агрегирование", "Инкапсуляция", "Полиморфизм"], correct: "2" },
+        { id: 31, topic: "Компонентные технологии", type: QuestionType.SingleChoice, text: "Как называется COM-объект, который имеет собственные перманентные данные, в составе которых все, что необходимо для запуска и инициализации одного экземпляра объекта?", options: ["Делегат", "Прокси", "Моникер", "Заглушка"], correct: "3" },
+        { id: 32, topic: "Компонентные технологии", type: QuestionType.Sequence, text: "Расположите в правильном порядке действия по созданию объекта COM:", options: ["Вызов CoCreateInstance", "Нахождение записи о классе объекта", "Запуск сервера и возвращение указателя", "Вызов требуемого метода"], correct: "1234" },
+        { id: 33, topic: "Компонентные технологии", type: QuestionType.SingleChoice, text: "Как называется универсальный промежуточный язык, используемый в технологии .Net Framework?", options: ["CLR", "CIL", "JIT", "MSIL"], correct: "2" },
+        { id: 50, topic: "Компонентные технологии", type: QuestionType.SingleChoice, text: "Набор базовых, необходимых для функционирования большинства компонентов служб, вместе с поддерживаемой с их помощью компонентной моделью, называется:", options: ["Фреймворк", "Платформа", "Компонентная среда", "Архитектура"], correct: "3" },
+        { id: 55, topic: "Компонентные технологии", type: QuestionType.MultipleChoice, text: "К квазикомпонентным технологиям относят:", options: ["Сокеты", "Системы распределенных объектов", "Вызов удаленных процедур", "Сервисно-ориентированные системы"], correct: "1,2,3,4" },
+        { id: 56, topic: "Компонентные технологии", type: QuestionType.SingleChoice, text: "Как называется способ повторного использования COM-объектов, при котором внешний объект использует внутренний объект в качестве сервера, при этом к методам внутреннего объекта обращаться может только внешний объект?", options: ["Агрегирование", "Включение", "Наследование", "Делегирование"], correct: "2" },
+        { id: 71, topic: "Компонентные технологии", type: QuestionType.SingleChoice, text: "Как называется расширение объектной модели компонентов COM, в основе которой лежат механизм работы с транзакциями, событиями и очередями сообщений?", options: ["DCOM", "COM+", ".NET Remoting", "CORBA"], correct: "2" },
+        { id: 73, topic: "Компонентные технологии", type: QuestionType.MultipleChoice, text: "Основными составными частями .NET Framework являются:", options: ["Библиотека классов (FCL)", "JVM", "Среда исполнения (CLR)", "COM+"], correct: "1,3" },
+
+        // Веб-сервисы
+        { id: 11, topic: "Веб-сервисы", type: QuestionType.MultipleChoice, text: "Назовите протоколы, определяющие механизмы обнаружения Web-сервисов:", options: ["SOAP", "UDDI", "WSDL", "ebXML"], correct: "2,4" },
+        { id: 14, topic: "Веб-сервисы", type: QuestionType.SingleChoice, text: "Язык, который позволяет описывать бизнес-процесс в терминах некоторой последовательности обращения к Web-сервисам, называется:", options: ["WSDL", "BPEL", "SOAP", "UDDI"], correct: "2" },
+        { id: 35, topic: "Веб-сервисы", type: QuestionType.SingleChoice, text: "Укажите название языка описания веб-служб:", options: ["UDDI", "SOAP", "WSDL", "BPEL"], correct: "3" },
+        { id: 37, topic: "Веб-сервисы", type: QuestionType.MultipleChoice, text: "Назовите протоколы, определяющие форматы сообщений и способ обмена сообщениями:", options: ["SOAP", "HTTP", "XML-RPC", "JMS"], correct: "1,3" },
+        { id: 40, topic: "Веб-сервисы", type: QuestionType.SingleChoice, text: "Выберите правильное трактование ответа на запрос XML-RPC:\n<methodResponse><params><param><value>boat</value></params></methodResponse>", options: ["Ответ с двумя параметрами", "Ответ с одним параметром, значение параметра: boat", "Ошибка формата", "Запрос на вызов метода"], correct: "2" },
+        { id: 44, topic: "Веб-сервисы", type: QuestionType.Matching, text: "Установите соответствие для справочника реестра UDDI:", matchingOptions: { "1": "Справочник «зеленых страниц»", "2": "Справочник «белых страниц»", "3": "Справочник «желтых страниц»" }, matchingValues: { "А": "Содержит способы доступа к сервисам", "Б": "Содержит базовую информацию о бизнесе", "В": "Содержит бизнес-информацию, классифицированную по типу бизнеса" }, correct: "1-А,2-Б,3-В" },
+        { id: 45, topic: "Веб-сервисы", type: QuestionType.SingleChoice, text: "Выберите правильное трактование ответа на запрос SOAP (содержит параметр TranslateResult со значением boat):", options: ["Ответ без параметров", "Параметр с именем TranslateResult имеет значение boat", "Ошибка в формате SOAP", "Запрос на перевод слова"], correct: "2" },
+        { id: 46, topic: "Веб-сервисы", type: QuestionType.SingleChoice, text: "Выберите правильное трактование запроса SOAP (вызывается метод Translate с параметром 'лодка'):", options: ["Вызывается метод Translate с одним параметром, значение параметра: лодка", "Вызывается метод Translate без параметров", "Это ответ на запрос Translate", "Ошибка в формате XML"], correct: "1" },
+        { id: 49, topic: "Веб-сервисы", type: QuestionType.MultipleChoice, text: "Назовите недостатки протокола XML-RPC:", options: ["Избыточность XML", "Не поддерживают работу с объектами", "Отсутствуют пространства имен", "Слишком сложный синтаксис"], correct: "1,2,3" },
+        { id: 60, topic: "Веб-сервисы", type: QuestionType.MultipleChoice, text: "Назовите транспортные протоколы, отвечающие за транспортировку сообщений:", options: ["HTTP", "SOAP", "JMS", "FTP", "SMTP", "WSDL"], correct: "1,3,4,5" },
+        { id: 63, topic: "Веб-сервисы", type: QuestionType.Sequence, text: "Расположите протоколы для работы с веб-сервисами в правильном порядке, начиная с высокого уровня:\n1. UDDI, ebXML\n2. WSDL\n3. SOAP, XML-RPC\n4. HTTP, JMS, FTP, SMTP", options: ["UDDI, ebXML", "WSDL", "SOAP, XML-RPC", "HTTP, JMS, FTP, SMTP"], correct: "1234" },
+        { id: 64, topic: "Веб-сервисы", type: QuestionType.Sequence, text: "Расположите шаги вызова удаленной процедуры RPC в правильном порядке:", options: ["Клиент выполняет локальный вызов процедуры", "Серверная заглушка выполняет требуемую процедуру", "Результаты передаются клиентской заглушке", "Клиентская заглушка передает результат программе"], correct: "1234" },
+        { id: 66, topic: "Веб-сервисы", type: QuestionType.Sequence, text: "Расставьте правильно шаги алгоритма создания соглашения о сотрудничестве в реестре ebXML:", options: ["Сторона, оказывающая услуги, регистрирует заявление", "Сторона, заинтересованная в услуге, находит заявление", "Создается проект соглашения", "Стороны достигают соглашения"], correct: "1234" },
+        { id: 67, topic: "Веб-сервисы", type: QuestionType.Matching, text: "Установите соответствие тегов WSDL:", matchingOptions: { "1": "binding", "2": "portType", "3": "message", "4": "service" }, matchingValues: { "А": "Формат пересылки и протоколы", "Б": "Указание порта сервиса", "В": "Сообщения в терминах «запрос-ответ»", "Г": "Местонахождение сервиса" }, correct: "1-А,2-Б,3-В,4-Г" },
+        { id: 68, topic: "Веб-сервисы", type: QuestionType.Matching, text: "Установите соответствие функций API UDDI:", matchingOptions: { "1": "Get_xxx функции", "2": "Find_xxx функции", "3": "Delete_xxx функции", "4": "Save_xxx функции" }, matchingValues: { "А": "Функции для получения информации о сервисах", "Б": "Функции для поиска сервисов", "В": "Функции для удаления сервисов", "Г": "Функции для регистрации и изменения сервисов" }, correct: "1-А,2-Б,3-В,4-Г" },
+        { id: 72, topic: "Веб-сервисы", type: QuestionType.SingleChoice, text: "Выберите правильное трактование ответа на запрос XML-RPC:\n<methodResponse><params><param><value>boat</value></param></params></methodResponse>", options: ["Ответ с одним параметром, значение: boat", "Ответ с двумя параметрами", "Ошибка в формате XML", "Пустой ответ"], correct: "1" },
+
+        // Безопасность
+        { id: 13, topic: "Безопасность", type: QuestionType.SingleChoice, text: "Механизм управления доступом, при использовании которого для каждого субъекта необходимо перечислить все объекты, к которым он имеет доступ, называется:", options: ["Мандатное управление", "Прямое управление", "Ролевое управление", "Атрибутное управление"], correct: "2" },
+        { id: 34, topic: "Безопасность", type: QuestionType.SingleChoice, text: "Механизм управления доступ, при использовании которого права доступа определяются ролям:", options: ["Прямое управление", "Мандатное управление", "Ролевое управление", "Атрибутное управление"], correct: "3" },
+        { id: 43, topic: "Безопасность", type: QuestionType.SingleChoice, text: "Механизм управления доступом, при использовании которого все объекты и субъекты относятся к определенному уровню, на котором им разрешено работать, называется:", options: ["Прямое управление", "Мандатное управление", "Ролевое управление", "Атрибутное управление"], correct: "2" },
+
+        // Классификация систем
+        { id: 15, topic: "Классификация систем", type: QuestionType.MultipleChoice, text: "Что включает в себя информационная система?", options: ["Программное обеспечение", "Вычислительное оборудование", "Системный персонал", "Лингвистические средства", "Информационные ресурсы"], correct: "1,2,3,4,5" },
+        { id: 22, topic: "Классификация систем", type: QuestionType.Sequence, text: "Расположите шаги RMI-запроса в правильной последовательности:", options: ["Удаленный объект создается на сервере", "Клиент обращается к RMI-реестру", "Реестр отыскивает заместителя объекта", "Клиент вызывает метод у заместителя"], correct: "1234" },
+        { id: 23, topic: "Классификация систем", type: QuestionType.SingleChoice, text: "Какой методологии разработки программного обеспечения не существует?", options: ["Waterfall", "Scrum", "RUP", "Управление персоналом"], correct: "4" },
+        { id: 24, topic: "Классификация систем", type: QuestionType.SingleChoice, text: "Системы, назначением которых является измерение некоторых параметров и выдача управляющих воздействий, называются:", options: ["Системы управления доступом", "Системы мониторинга ресурсов", "Управляющие системы", "Системы управления производством"], correct: "3" },
+        { id: 29, topic: "Классификация систем", type: QuestionType.SingleChoice, text: "Порталы, предоставляющие бизнес-услуги потребителям и компаниям, называют:", options: ["Корпоративные", "Публичные", "Вертикальные", "Горизонтальные"], correct: "1" },
+        { id: 38, topic: "Классификация систем", type: QuestionType.SingleChoice, text: "Web-приложение, которое предоставляет пользователю доступ к различным сервисам, называется:", options: ["Портал", "Сайт", "Приложение", "Сервис"], correct: "1" },
+        { id: 41, topic: "Классификация систем", type: QuestionType.SingleChoice, text: "ИТ-системы, обеспечивающие выдачу консолидированных данных для поддержки принятия решений, называются:", options: ["Информационно-управляющие системы", "Системы управления доступом", "Системы мониторинга", "Управляющие системы"], correct: "1" },
+        { id: 42, topic: "Классификация систем", type: QuestionType.SingleChoice, text: "Системы, назначением которых является отслеживание состояния сущности с момента поступления до момента выхода из системы, называются:", options: ["Системы управления производством", "Системы мониторинга и управления ресурсами", "Управляющие системы", "Информационно-управляющие системы"], correct: "2" },
+        { id: 51, topic: "Классификация систем", type: QuestionType.Matching, text: "Установите соответствие типов рисков:", matchingOptions: { "1": "Проектный риск", "2": "Бизнес-риск", "3": "Операционный риск", "4": "Технический риск" }, matchingValues: { "А": "Неподходящая технология для реализации", "Б": "Потеря покупателя из-за недовольства", "В": "Невозможность выполнить операцию", "Г": "Перегрузка сервера запросами" }, correct: "1-А,2-Б,3-В,4-Г" },
+        { id: 58, topic: "Классификация систем", type: QuestionType.SingleChoice, text: "Какой федеральный закон Российской Федерации дает определение информационной системы?", options: ["№149-ФЗ", "№152-ФЗ", "№161-ФЗ", "№187-ФЗ"], correct: "1" },
+        { id: 61, topic: "Классификация систем", type: QuestionType.SingleChoice, text: "Небольшие приложения портала, разработка и просмотр которого осуществляется независимо от других, называется:", options: ["Виджет", "Портлет", "Модуль", "Компонент"], correct: "2" },
+        { id: 62, topic: "Классификация систем", type: QuestionType.SingleChoice, text: "Определенная структура памяти, содержащая массив указателей на функции, называется:", options: ["Интерфейс", "Класс", "Объект", "Метод"], correct: "1" },
+        { id: 69, topic: "Классификация систем", type: QuestionType.SingleChoice, text: "Архитектура, при которой клиент реализует только логику представления, называется:", options: ["Двухуровневая архитектура", "Трехуровневая архитектура", "Многоуровневая архитектура", "Микросервисная архитектура"], correct: "2" },
+        { id: 70, topic: "Классификация систем", type: QuestionType.SingleChoice, text: "Системы, назначением которых является обеспечение доступа субъектов к объектам с использованием политик и ролей, называются:", options: ["Системы управления производством", "Системы управления доступом", "Системы мониторинга", "Управляющие системы"], correct: "2" },
+
+        // Методологии
+        { id: 16, topic: "Методологии", type: QuestionType.Matching, text: "Установите соответствие:", matchingOptions: { "1": "Архитектурный стиль", "2": "Разработка документации", "3": "Управление требованиями", "4": "Управление качеством" }, matchingValues: { "А": "Создание легко адаптируемых фреймворков", "Б": "Получение детального описания системы", "В": "Разработка системы с наибольшим набором функций", "Г": "Обеспечение высокой отказоустойчивости" }, correct: "1-А,2-Б,3-В,4-Г" }
+    ];
+
+    // --- LOGIC ---
+    let currentQuestions = [];
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let userAnswers = [];
+
+    // Initialize App
+    document.addEventListener('DOMContentLoaded', () => {
+        initStartScreen();
+        setupEventListeners();
+    });
+
+    function initStartScreen() {
+        const topics = [...new Set(rawQuestions.map(q => q.topic))];
+        const topicList = document.getElementById('topic-list');
+        topicList.innerHTML = '';
+        
+        topics.forEach(topic => {
+            const li = document.createElement('li');
+            li.className = 'topic-item';
+            li.textContent = topic;
+            li.dataset.topic = topic;
+            li.onclick = () => li.classList.toggle('selected');
+            topicList.appendChild(li);
+        });
+    }
+
+    function setupEventListeners() {
+        document.getElementById('select-all-topics').onclick = () => {
+            const items = document.querySelectorAll('.topic-item');
+            const allSelected = Array.from(items).every(i => i.classList.contains('selected'));
+            items.forEach(i => allSelected ? i.classList.remove('selected') : i.classList.add('selected'));
+        };
+
+        document.getElementById('start-btn').onclick = startTest;
+        document.getElementById('submit-btn').onclick = submitAnswer;
+        document.getElementById('next-btn').onclick = nextQuestion;
+    }
+
+    function startTest() {
+        // Get selected topics
+        const selectedTopicEls = document.querySelectorAll('.topic-item.selected');
+        const selectedTopics = Array.from(selectedTopicEls).map(el => el.dataset.topic);
+
+        if (selectedTopics.length === 0) {
+            alert("Пожалуйста, выберите хотя бы один раздел.");
+            return;
+        }
+
+        // Filter questions
+        let filtered = rawQuestions.filter(q => selectedTopics.includes(q.topic));
+        
+        // Randomize order
+        filtered.sort(() => Math.random() - 0.5);
+
+        // Limit count
+        const countInput = document.getElementById('question-count');
+        const count = parseInt(countInput.value) || 0;
+        if (count > 0 && count < filtered.length) {
+            filtered = filtered.slice(0, count);
+        }
+
+        // Process options randomization (deep copy to not affect original)
+        currentQuestions = filtered.map(q => prepareQuestion(q));
+
+        if (currentQuestions.length === 0) {
+            alert("Нет вопросов по выбранным темам.");
+            return;
+        }
+
+        // Reset state
+        currentQuestionIndex = 0;
+        score = 0;
+        userAnswers = [];
+
+        // Switch View
+        switchView('quiz-screen');
+        renderQuestion();
+    }
+
+    function prepareQuestion(original) {
+        // Deep copy
+        const q = JSON.parse(JSON.stringify(original));
+        
+        // Shuffle logic depends on type
+        if (q.type === QuestionType.SingleChoice || q.type === QuestionType.MultipleChoice) {
+            // Map options to original indices to track correct answer
+            let indexedOptions = q.options.map((opt, idx) => ({ idx: idx + 1, text: opt }));
+            indexedOptions.sort(() => Math.random() - 0.5);
+            
+            q.options = indexedOptions.map(o => o.text);
+            
+            // Remap correct answer string
+            const correctIndices = q.correct.split(',').map(s => parseInt(s.trim()));
+            const newCorrectIndices = correctIndices.map(oldIdx => {
+                return indexedOptions.findIndex(o => o.idx === oldIdx) + 1;
+            }).sort((a,b) => a-b);
+            
+            q.correct = newCorrectIndices.join(',');
+        }
+        
+        // Matching: Shuffle values, keep keys sorted
+        // Sequence: Options are typically presented in correct order in source for checking, but need to be shuffled for display? 
+        // Actually, for sequence, we shuffle the display options.
+        if (q.type === QuestionType.Sequence) {
+             let indexedOptions = q.options.map((opt, idx) => ({ idx: idx + 1, text: opt }));
+             indexedOptions.sort(() => Math.random() - 0.5);
+             q.options = indexedOptions.map(o => o.text);
+             // We don't remap 'correct' here because Sequence logic checks user input order against '1234' usually, 
+             // but here the code expects user to input '1234' referring to ORIGINAL order?
+             // Actually C# code logic: "Для последовательностей введите цифры подряд (например: 1234)".
+             // This implies the user looks at the shuffled list and says "Item 3 is first, then Item 1...". 
+             // WEB UI: We will let user drag items. The validation will compare the text of the order.
+        }
+
+        return q;
+    }
+
+    function switchView(id) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function renderQuestion() {
+        const q = currentQuestions[currentQuestionIndex];
+        
+        // UI Updates
+        document.getElementById('question-topic').textContent = q.topic;
+        document.getElementById('question-counter').textContent = `${currentQuestionIndex + 1} / ${currentQuestions.length}`;
+        document.getElementById('question-text').textContent = q.text;
+        
+        const progressPercent = ((currentQuestionIndex) / currentQuestions.length) * 100;
+        document.getElementById('progress-fill').style.width = `${progressPercent}%`;
+        
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+
+        // Render based on type
+        if (q.type === QuestionType.SingleChoice || q.type === QuestionType.MultipleChoice) {
+            const inputType = q.type === QuestionType.SingleChoice ? 'radio' : 'checkbox';
+            q.options.forEach((opt, idx) => {
+                const div = document.createElement('div');
+                div.className = 'option-item';
+                div.onclick = (e) => {
+                    if (e.target.tagName !== 'INPUT') {
+                        const inp = div.querySelector('input');
+                        inp.checked = !inp.checked;
+                        // Single choice manual toggle behavior
+                        if (inputType === 'radio') {
+                            document.querySelectorAll('input[name="opt"]').forEach(i => {
+                                if(i !== inp) i.checked = false;
+                                i.closest('.option-item').classList.remove('selected');
+                            });
+                            inp.checked = true;
+                        }
+                    }
+                    // Update visual state
+                    if (inputType === 'checkbox') {
+                        div.classList.toggle('selected', div.querySelector('input').checked);
+                    } else {
+                        div.classList.add('selected');
+                    }
+                };
+
+                const input = document.createElement('input');
+                input.type = inputType;
+                input.name = 'opt';
+                input.value = idx + 1;
+
+                const label = document.createElement('span');
+                label.textContent = opt;
+
+                div.appendChild(input);
+                div.appendChild(label);
+                container.appendChild(div);
+            });
+        } 
+        else if (q.type === QuestionType.Sequence) {
+            const ul = document.createElement('ul');
+            ul.className = 'sortable-list';
+            ul.id = 'sequence-list';
+            
+            // For sequence, display options. Logic: Drag and drop to order.
+            // We'll store the original text to compare later.
+            q.options.forEach((opt, idx) => {
+                const li = document.createElement('li');
+                li.className = 'sortable-item';
+                li.textContent = opt;
+                li.draggable = true;
+                li.dataset.originalIndex = idx; // Only useful if strict index checking
+                
+                // Simple DnD logic
+                li.addEventListener('dragstart', () => li.classList.add('dragging'));
+                li.addEventListener('dragend', () => li.classList.remove('dragging'));
+                
+                ul.appendChild(li);
+            });
+            
+            container.appendChild(ul);
+            initSortable(ul);
+        }
+        else if (q.type === QuestionType.Matching) {
+            // Left column (Keys), Right column (Dropdowns of values)
+            Object.keys(q.matchingOptions).forEach(key => {
+                const row = document.createElement('div');
+                row.className = 'matching-row';
+                
+                const keyDiv = document.createElement('div');
+                keyDiv.className = 'matching-key';
+                keyDiv.textContent = `${key}. ${q.matchingOptions[key]}`;
+                
+                const select = document.createElement('select');
+                select.className = 'matching-select';
+                select.dataset.key = key;
+                
+                const defaultOpt = document.createElement('option');
+                defaultOpt.text = "Выберите...";
+                defaultOpt.value = "";
+                select.appendChild(defaultOpt);
+                
+                // Add values (shuffled visually, but logic needs to match A with B)
+                // C# Logic uses A1-B2. 
+                // We will check: Does Selected Value == Expected Value for this Key?
+                const values = Object.entries(q.matchingValues);
+                // Shuffle values
+                values.sort(() => Math.random() - 0.5);
+                
+                values.forEach(([valKey, valText]) => {
+                    const opt = document.createElement('option');
+                    opt.value = valKey; // A, B, C...
+                    opt.text = valText;
+                    select.appendChild(opt);
+                });
+                
+                row.appendChild(keyDiv);
+                row.appendChild(select);
+                container.appendChild(row);
+            });
+        }
+
+        // Reset Buttons
+        document.getElementById('submit-btn').style.display = 'inline-flex';
+        document.getElementById('next-btn').style.display = 'none';
+        document.getElementById('feedback-area').style.display = 'none';
+        
+        // Unlock inputs
+        const inputs = container.querySelectorAll('input, select');
+        inputs.forEach(i => i.disabled = false);
+    }
+
+    function initSortable(list) {
+        list.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            const afterElement = getDragAfterElement(list, e.clientY);
+            const draggable = document.querySelector('.dragging');
+            if (afterElement == null) {
+                list.appendChild(draggable);
+            } else {
+                list.insertBefore(draggable, afterElement);
+            }
+        });
+    }
+
+    function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.sortable-item:not(.dragging)')];
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    function submitAnswer() {
+        const q = currentQuestions[currentQuestionIndex];
+        let isCorrect = false;
+        let userAnswerDisplay = "";
+
+        if (q.type === QuestionType.SingleChoice) {
+            const selected = document.querySelector('input[name="opt"]:checked');
+            if (!selected) return;
+            isCorrect = selected.value === q.correct;
+            userAnswerDisplay = selected.nextSibling.textContent;
+        }
+        else if (q.type === QuestionType.MultipleChoice) {
+            const selected = Array.from(document.querySelectorAll('input[name="opt"]:checked'))
+                .map(el => el.value)
+                .sort((a,b) => a-b)
+                .join(',');
+            if (!selected) return;
+            isCorrect = selected === q.correct;
+            userAnswerDisplay = selected;
+        }
+        else if (q.type === QuestionType.Sequence) {
+            // For this app, sequence checking is tricky because C# source expects "1234" (original indices).
+            // But we displayed text.
+            // Simplified logic: The correct answer "1234" implies the text options provided in the source
+            // ARE ALREADY in the correct order (1st item, 2nd item...).
+            // So we check if the current DOM order matches the original source order.
+            
+            // Note: In preparing the question, we shuffled options.
+            // We need to match the text content.
+            
+            // Get original ordered texts from rawQuestions (find by ID)
+            const originalQ = rawQuestions.find(rq => rq.id === q.id);
+            const originalOrder = originalQ.options; // ["Step1", "Step2", ...]
+            
+            const currentOrder = Array.from(document.querySelectorAll('.sortable-item')).map(el => el.textContent);
+            
+            // Compare arrays
+            isCorrect = JSON.stringify(currentOrder) === JSON.stringify(originalOrder);
+            userAnswerDisplay = "Ваш порядок";
+        }
+        else if (q.type === QuestionType.Matching) {
+            const selects = document.querySelectorAll('.matching-select');
+            let correctCount = 0;
+            let total = selects.length;
+            
+            // Parse correct string "1-А,2-Б..."
+            const pairs = q.correct.split(',').map(p => p.trim());
+            const correctMap = {};
+            pairs.forEach(p => {
+                const [k, v] = p.split('-');
+                correctMap[k] = v;
+            });
+            
+            selects.forEach(sel => {
+                const key = sel.dataset.key;
+                const val = sel.value;
+                if (correctMap[key] === val) correctCount++;
+            });
+            
+            isCorrect = correctCount === total;
+            userAnswerDisplay = "Соответствия";
+        }
+
+        // Process Result
+        if (isCorrect) score++;
+        userAnswers.push({ q, isCorrect });
+
+        // Show Feedback
+        const feedback = document.getElementById('feedback-area');
+        feedback.className = `feedback ${isCorrect ? 'success' : 'error'}`;
+        
+        let correctText = "";
+        if (!isCorrect) {
+            if (q.type === QuestionType.SingleChoice || q.type === QuestionType.MultipleChoice) {
+                // Determine text of correct options
+                const correctIndices = q.correct.split(',');
+                const correctLabels = correctIndices.map(idx => {
+                    return q.options[parseInt(idx)-1];
+                });
+                correctText = `Правильный ответ: ${correctLabels.join(', ')}`;
+            } else if (q.type === QuestionType.Sequence) {
+                 const originalQ = rawQuestions.find(rq => rq.id === q.id);
+                 correctText = "Правильный порядок:\n" + originalQ.options.map((o,i) => `${i+1}. ${o}`).join('\n');
+            } else if (q.type === QuestionType.Matching) {
+                correctText = "Правильные пары: " + q.correct;
+            }
+        }
+        
+        feedback.innerText = isCorrect ? "Правильно!" : `Неправильно. ${correctText}`;
+        feedback.style.display = 'block';
+
+        // Lock inputs
+        document.querySelectorAll('input, select').forEach(i => i.disabled = true);
+        document.querySelectorAll('.sortable-item').forEach(i => i.draggable = false);
+
+        document.getElementById('submit-btn').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'inline-flex';
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < currentQuestions.length) {
+            renderQuestion();
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        switchView('result-screen');
+        const percent = Math.round((score / currentQuestions.length) * 100);
+        document.getElementById('final-score').textContent = `${percent}%`;
+        document.getElementById('final-score').style.color = percent >= 75 ? 'var(--success)' : (percent >= 50 ? '#d97706' : 'var(--error)');
+        
+        let msg = "";
+        if (percent >= 90) msg = "Отлично! 🎉 Вы отлично знаете материал!";
+        else if (percent >= 75) msg = "Хорошо! 👍 Солидные знания!";
+        else if (percent >= 60) msg = "Удовлетворительно. Можно лучше.";
+        else msg = "Нужно повторить материал 📚";
+        
+        document.getElementById('final-message').textContent = msg;
+
+        // Topic Breakdown
+        const stats = {};
+        userAnswers.forEach(ans => {
+            const t = ans.q.topic;
+            if (!stats[t]) stats[t] = { total: 0, correct: 0 };
+            stats[t].total++;
+            if (ans.isCorrect) stats[t].correct++;
+        });
+
+        const statsContainer = document.getElementById('topic-stats-container');
+        statsContainer.innerHTML = '';
+        
+        Object.keys(stats).forEach(topic => {
+            const s = stats[topic];
+            const p = Math.round((s.correct / s.total) * 100);
+            const div = document.createElement('div');
+            div.className = 'stat-row';
+            
+            let colorClass = 'stat-bad';
+            if (p >= 80) colorClass = 'stat-good';
+            else if (p >= 60) colorClass = 'stat-avg';
+            
+            div.innerHTML = `
+                <span>${topic}</span>
+                <span class="${colorClass}"><b>${s.correct}/${s.total}</b> (${p}%)</span>
+            `;
+            statsContainer.appendChild(div);
+        });
+    }
+
+</script>
+
+</body>
+</html>
